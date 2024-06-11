@@ -46,7 +46,6 @@
         <Folder Include="Helpers\HangFire\" />
         <Folder Include="Migrations\" />
         <Folder Include="wwwroot\Attachments\" />
-        <Folder Include="wwwroot\Logo\" />
         <Folder Include="wwwroot\MigrationsFile\" />
     </ItemGroup>
 

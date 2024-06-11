@@ -17,6 +17,6 @@ public class EmailController : BaseController
     public async Task<IActionResult> RegisterEmailAsync(EmailForm emailForm) => Ok(await _emailService.RegisterEmailAsync(emailForm));
     
     [HttpPost("send")]
-    public async Task<IActionResult> Send(int email) => Ok(await _emailService.Send(email));
+    public async Task<IActionResult> Send() => Ok(await _emailService.Send());
 
 }

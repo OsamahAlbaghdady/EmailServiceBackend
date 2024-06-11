@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using GaragesStructure.DATA;
 using GaragesStructure.DATA.DTOs.Email;
 using GaragesStructure.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace GaragesStructure.Services;
 
@@ -10,7 +12,7 @@ public interface IEmailService
 {
     Task<(EmailDto? email, string? error)> RegisterEmailAsync(EmailForm emailForm);
     
-    Task<(EmailDto? email, string? error)> Send(int email);
+    Task<(EmailDto? email, string? error)> Send();
 }
 
 public class EmailService : IEmailService
@@ -46,7 +48,7 @@ public class EmailService : IEmailService
         }, null);
     }
 
-    public  async Task<(EmailDto? email, string? error)> Send(int email)
+    public  async Task<(EmailDto? email, string? error)> Send()
     {
         
         
@@ -57,27 +59,76 @@ public class EmailService : IEmailService
 
         // Email details
         string fromEmail = "technoabg@gmail.com";
-        string toEmail = "haidersaadon22@gmail.com"; 
-        string subject = "Test Email with Attachment";
-        string body = "ها كلب";
-        string attachmentPath = "path/to/your/attachment.txt";
-
-        // ocvs hwqr hums qjvr
-        MailMessage mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
+        // string toEmail = "haidersaadon22@gmail.com"; 
+        string subject = "تم اقتتاح ساحة بغداد للتبادل التجاري 🚀🎉";
+        
+        var body = "<p style='font-size: 16px;'>🎉 انضم إلينا في افتتاح مشروعنا الجديد! ستكون لحظة مميزة ومليئة بالإثارة. هيا بنا نحقق النجاح معًا! انضموا إلينا في حفل الافتتاح وكونوا جزءًا من هذه الرحلة الملهمة! 🚀 #افتتاح_المشروع</p>";
+        
 
         
+        // send email to all emails in db 
+        
+        var emails = await _context.Emails.ToListAsync();
+        
+        foreach (var email in emails)
+        {
+            string toEmail = email.EmailToSend;
+            MailMessage mailMessage = new MailMessage(fromEmail, toEmail)
+            {
+                Subject = subject,
+                IsBodyHtml = true, // Set to true to indicate HTML content
+                Body = "<p dir='rtl' style='font-size: 16px;'>🎉 انضم إلينا في افتتاح مشروعنا الجديد! ستكون لحظة مميزة ومليئة بالإثارة. هيا بنا نحقق النجاح معًا! انضموا إلينا في حفل الافتتاح وكونوا جزءًا من هذه الرحلة الملهمة! 🚀 #افتتاح_المشروع</p>" +
+                       "<img src='cid:image1' width='100%'/>"
+            };
+            
+
+            var attachmentsDir = Path.Combine(Directory.GetCurrentDirectory(),
+                "wwwroot", "Logo");
+            
+            string imagePath = Path.Combine(attachmentsDir, "bexy.png");
+
+            LinkedResource linkedImage = new LinkedResource(imagePath);
+            linkedImage.ContentId = "image1";
+
+            AlternateView htmlView = AlternateView.CreateAlternateViewFromString(mailMessage.Body, null, MediaTypeNames.Text.Html);
+            htmlView.LinkedResources.Add(linkedImage);
+
+            mailMessage.AlternateViews.Add(htmlView);
+
+            SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort)
+            {
+                Credentials = new NetworkCredential(smtpUser, smtpPass),
+                EnableSsl = true
+            };
+
+            smtpClient.Send(mailMessage);
+        }
+
+
+
+        
+        //
+        // // ocvs hwqr hums qjvr
+        // MailMessage mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
+        //
+        //
         // Attachment attachment = new Attachment(attachmentPath);
         // mailMessage.Attachments.Add(attachment);
+        //
+        //
+        // SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort)
+        // {
+        //     Credentials = new NetworkCredential(smtpUser, smtpPass),
+        //     EnableSsl = true
+        //     
+        // };
+        //
 
+   
+    
         
-        SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort)
-        {
-            Credentials = new NetworkCredential(smtpUser, smtpPass),
-            EnableSsl = true
-            
-        };
 
-        smtpClient.Send(mailMessage);
+        // smtpClient.Send(mailMessage);
         Console.WriteLine("Email sent successfully.");
         
         return (null, null);
