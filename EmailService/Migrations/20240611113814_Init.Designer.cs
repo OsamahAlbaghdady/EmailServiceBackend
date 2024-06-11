@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GaragesStructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240608144803_Nw")]
-    partial class Nw
+    [Migration("20240611113814_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
